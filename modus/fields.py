@@ -71,6 +71,20 @@ class Integer(BaseField):
             raise FieldValidationError(msg) from None
 
 
+class Boolean(BaseField):
+
+    ERRORS = {'not_boolean': 'This is not a valid boolean'}
+
+    def serialize(self, value):
+        return value
+
+    def deserialize(self, value):
+        if not isinstance(value, bool):
+            msg = self.ERRORS['not_boolean']
+            raise FieldValidationError(msg) from None
+        return value
+
+
 class Snowflake(BaseField):
 
     ERRORS = {'not_snowflake': 'This is not a snowflake id'}
