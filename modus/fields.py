@@ -1,7 +1,7 @@
 import re
 
 from modus.field import Field
-from modus.exceptions import FieldValidationError, StopValidation
+from modus.exceptions import FieldValidationError, StopValidation, SerializationError
 
 
 class BaseField(Field):
@@ -50,7 +50,15 @@ class Integer(BaseField):
             return int(value)
         except (TypeError, ValueError):
             msg = self.ERRORS['not_integer']
-            raise FieldValidationError(msg) from None
+            raise SerializationError(msg) from None
+
+    @Field.validator
+    def is_integer(self, value):
+        try:
+            int(value)
+        except (TypeError, ValueError):
+            msg = self.ERRORS['not_integer']
+            raise FieldValidationError(msg, stop_validation=True) from None
 
     @Field.validator
     def validate_min(self, value):
@@ -75,27 +83,38 @@ class Boolean(BaseField):
 
     ERRORS = {'not_boolean': 'This is not a valid boolean'}
 
-    def serialize(self, value):
-        return value
-
     def deserialize(self, value):
         if not isinstance(value, bool):
             msg = self.ERRORS['not_boolean']
-            raise FieldValidationError(msg) from None
+            raise SerializationError(msg) from None
         return value
+
+    @Field.validator
+    def is_boolean(self, value):
+        if not isinstance(value, bool):
+            msg = self.ERRORS['not_boolean']
+            raise FieldValidationError(msg) from None
 
 
 class Snowflake(BaseField):
 
     ERRORS = {'not_snowflake': 'This is not a snowflake id'}
 
-    def serialize(self, value):
+    def deserialize(self, value):
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            msg = self.ERRORS['not_snowflake']
+            raise SerializationError(msg) from None
+
+        if value.bit_length() > 64:
+            msg = self.ERRORS['not_snowflake']
+            raise SerializationError(msg) from None
+
         return value
 
-    def deserialize(self, value):
-        if value is None:
-            return value
-
+    @Field.validator
+    def is_snowflake(self, value):
         try:
             value = int(value)
         except (TypeError, ValueError):
@@ -106,7 +125,6 @@ class Snowflake(BaseField):
             msg = self.ERRORS['not_snowflake']
             raise FieldValidationError(msg) from None
 
-        return value
 
 class String(BaseField):
 
@@ -137,9 +155,15 @@ class String(BaseField):
     def deserialize(self, value):
         if not isinstance(value, str):
             msg = self.ERRORS['not_string']
-            raise FieldValidationError(msg) from None
+            raise SerializationError(msg) from None
 
         return value
+
+    @Field.validator
+    def is_string(self, value):
+        if not isinstance(value, str):
+            msg = self.ERRORS['not_string']
+            raise FieldValidationError(msg, stop_validation=True) from None
 
     @Field.validator
     def validate_min_length(self, value):
