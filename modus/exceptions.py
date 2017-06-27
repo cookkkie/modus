@@ -4,6 +4,12 @@ class ValidationError(Exception): pass
 
 class StopValidation(Exception): pass
 
+class SerializationError(Exception):
+    def __init__(self, error):
+        self.error = error
+
+        Exception.__init__(self, self.error)
+
 class FieldValidationError(ValidationError):
     def __init__(self, *errors, stop_validation=False):
         self.errors = list(errors)
