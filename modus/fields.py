@@ -38,7 +38,7 @@ class Integer(BaseField):
               'min': '{0} should be greater than {1}',
               'max': '{0} should be lower than {1}'}
 
-    def __init__(self, min=-1, max=-1, **kwargs):
+    def __init__(self, min=None, max=None, **kwargs):
         self.min, self.max = min, max
         super(Integer, self).__init__(**kwargs)
 
@@ -62,7 +62,7 @@ class Integer(BaseField):
 
     @Field.validator
     def validate_min(self, value):
-        if self.min == -1:
+        if self.min is None:
             return
 
         if value < self.min:
@@ -71,7 +71,7 @@ class Integer(BaseField):
 
     @Field.validator
     def validate_max(self, value):
-        if self.max == -1:
+        if self.max is None:
             return
 
         if value > self.min:
