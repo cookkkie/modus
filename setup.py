@@ -8,7 +8,7 @@ setup(
     name='modus',
     author='cookkkie',
     url='https://github.com/cookkkie/modus',
-    version='0.0.2',
+    version='0.0.3',
     packages=find_packages(),
     license='MIT',
     description='',
