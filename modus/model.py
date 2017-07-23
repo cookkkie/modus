@@ -48,6 +48,13 @@ class Model(metaclass=MetaModel):
             dct[field_name] = field.serialize(value)
         return dct
 
+    def sanitize(self):
+        for field in self._fields.values():
+            value = getattr(self, field.name)
+            value = field.sanitize(value)
+            setattr(self, field.name, value)
+        return self
+
     def validate(self):
         validation_errors = {}
         for field in self._fields.values():

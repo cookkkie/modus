@@ -1,4 +1,5 @@
 import re
+import functools
 
 from modus.field import Field
 from modus.exceptions import FieldValidationError, StopValidation, SerializationError
@@ -9,10 +10,16 @@ class BaseField(Field):
     ERRORS = {'required': 'This field is required',
               'choices': 'Should be one of {0}'}
 
-    def __init__(self, required=False, default=None, choices=None):
+    def __init__(self, required=False, default=None, validators=[], sanitizers=[], choices=None):
         self.required = required
         self.default = default
         self.choices = choices
+        self.validators = [functools.partial(v, self) for v in self._validators]
+        if validators:
+            self.validators += validators
+        self.sanitizers = [functools.partial(s, self) for s in self._sanitizers]
+        if sanitizers:
+            self.sanitizers += sanitizers
         super(BaseField, self).__init__()
 
     @Field.validator
