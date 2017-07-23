@@ -224,6 +224,10 @@ class List(BaseField):
         for elem in elems:
             self.field.validate(elem)
 
+    @Field.sanitizer
+    def sanitize_elements(self, elems):
+        return [self.field.sanitize(e) for e in elems]
+
 
 class Dict(BaseField):
     def __init__(self, field, key=None, **kwargs):
@@ -251,6 +255,10 @@ class Dict(BaseField):
     def validate_elements(self, elems):
         for elem in elems.values():
             self.field.validate(elem)
+
+    @Field.sanitizer
+    def sanitize_elements(self, elems):
+        return {k: self.field.sanitize(v) for k, v in elems.items()}
 
 
 class ModelField(BaseField):
