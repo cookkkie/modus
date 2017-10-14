@@ -145,7 +145,7 @@ class String(BaseField):
         self.regex = regex
         self.min_length = min_length
         self.max_length = max_length
-        self.length = max_length
+        self.length = length
         super(String, self).__init__(**kwargs)
 
     @property
