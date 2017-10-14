@@ -1,4 +1,3 @@
-from modus.utils import get
 from modus.exceptions import FieldValidationError, ModelValidationError
 from modus.field import Field
 from copy import deepcopy
@@ -40,11 +39,20 @@ class Model(metaclass=MetaModel):
             setattr(instance, field_name, value and field.deserialize(value))
         return instance
 
+    def update(self, **kwargs):
+        cls = self.__class__
+        for field_name, field in cls._fields.items():
+            if field_name not in kwargs:
+                continue
+            value = kwargs.get(field_name)
+            setattr(self, field_name, value and field.deserialize(value))
+        return self
+
     def serialize(self):
         dct = {}
         fields = self.__class__._fields
         for field_name, field in fields.items():
-            value = get(self, field.name)
+            value = getattr(self, field.name, None)
             dct[field_name] = field.serialize(value)
         return dct
 
