@@ -232,7 +232,7 @@ class List(BaseField):
 class Dict(BaseField):
     def __init__(self, field, key=None, **kwargs):
         self.field = field
-        self.key = key if callable(key) else lambda _: key
+        self.key = key if callable(key) else lambda e: getattr(e, key)
         super(Dict, self).__init__(**kwargs)
 
     def deserialize(self, elems):
