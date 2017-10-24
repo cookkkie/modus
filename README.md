@@ -11,14 +11,14 @@ from modus.fields import Integer, String, Boolean, ModelField
 class User(Model):
     id = Snowflake(required=True)
     username = String(required=True)
-		password = String(required=True)
-		bio = String()
+    password = String(required=True)
+    bio = String()
 
 class Tweet(Model):
     id = Snowflake(required=True)
-		content = String()
-		author = ModelField(User)
-		likes = List(ModelField(User))
+    content = String()
+    author = ModelField(User)
+    likes = List(ModelField(User))
 
 # Instantiating a user
 user1 = User(id=1, username="cookkkie", password=1337, bio="hey!")
