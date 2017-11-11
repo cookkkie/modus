@@ -247,7 +247,7 @@ class Dict(BaseField):
 
     def serialize(self, elems):
         if elems is None:
-            return []
+            return {}
 
         return {k: self.field.serialize(v) for k, v in elems.items()}
 
