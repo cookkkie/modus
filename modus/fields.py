@@ -34,7 +34,7 @@ class BaseField(Field):
     @Field.validator
     def validate_choices(self, value):
         if self.choices is not None:
-            if value in self.choices:
+            if value not in self.choices:
                 msg = self.ERRORS['choices'].format(self.choices)
                 raise FieldValidationError(msg, stop_validation=True) from None
 
