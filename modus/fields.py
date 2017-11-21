@@ -233,6 +233,7 @@ class Dict(BaseField):
     def __init__(self, field, key=None, **kwargs):
         self.field = field
         self.key = key if callable(key) else lambda e: getattr(e, key)
+        self.to_dict = kwargs.get('to_dict', True)
         super(Dict, self).__init__(**kwargs)
 
     def deserialize(self, elems):
@@ -247,9 +248,14 @@ class Dict(BaseField):
 
     def serialize(self, elems):
         if elems is None:
-            return {}
+            value = {}
+        else:
+            value = {k: self.field.serialize(v) for k, v in elems.items()}
 
-        return {k: self.field.serialize(v) for k, v in elems.items()}
+        if not self.to_dict:
+            value = value.values()
+
+        return value
 
     @Field.validator
     def validate_elements(self, elems):
