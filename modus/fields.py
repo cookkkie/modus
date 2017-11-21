@@ -230,10 +230,10 @@ class List(BaseField):
 
 
 class Dict(BaseField):
-    def __init__(self, field, key=None, **kwargs):
+    def __init__(self, field, key=None, to_dict=True **kwargs):
         self.field = field
         self.key = key if callable(key) else lambda e: getattr(e, key)
-        self.to_dict = kwargs.get('to_dict', True)
+        self.to_dict = to_dict
         super(Dict, self).__init__(**kwargs)
 
     def deserialize(self, elems):
