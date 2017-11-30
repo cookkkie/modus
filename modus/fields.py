@@ -135,7 +135,7 @@ class Snowflake(BaseField):
 
 class String(BaseField):
 
-    ERRORS = {'not_string': 'This is not a string',
+    ERRORS = {'not_string': 'This ({0}) is not a string',
               'length': '{0} should be {1} characters long',
               'min_length': '{0} length should be higher than {1}',
               'max_length': '{0} length should be lower than {1}',
@@ -161,7 +161,7 @@ class String(BaseField):
 
     def deserialize(self, value):
         if not isinstance(value, str):
-            msg = self.ERRORS['not_string']
+            msg = self.ERRORS['not_string'].format(value)
             raise SerializationError(msg) from None
 
         return value
@@ -169,7 +169,7 @@ class String(BaseField):
     @Field.validator
     def is_string(self, value):
         if not isinstance(value, str):
-            msg = self.ERRORS['not_string']
+            msg = self.ERRORS['not_string'].format(value)
             raise FieldValidationError(msg, stop_validation=True) from None
 
     @Field.validator
@@ -230,7 +230,7 @@ class List(BaseField):
 
 
 class Dict(BaseField):
-    def __init__(self, field, key=None, to_dict=True **kwargs):
+    def __init__(self, field, key=None, to_dict=True, **kwargs):
         self.field = field
         self.key = key if callable(key) else lambda e: getattr(e, key)
         self.to_dict = to_dict
@@ -253,7 +253,7 @@ class Dict(BaseField):
             value = {k: self.field.serialize(v) for k, v in elems.items()}
 
         if not self.to_dict:
-            value = value.values()
+            value = list(value.values())
 
         return value
 
