@@ -36,7 +36,9 @@ class Model(metaclass=MetaModel):
             value = data.get(field.name)
             if value is None and hasattr(field, 'default'):
                 value = field.default
-            setattr(instance, field_name, value and field.deserialize(value))
+            if value is not None:
+                value = field.deserialize(value)
+            setattr(instance, field_name, value)
         return instance
 
     def update(self, **kwargs):
@@ -45,7 +47,9 @@ class Model(metaclass=MetaModel):
             if field_name not in kwargs:
                 continue
             value = kwargs.get(field_name)
-            setattr(self, field_name, value and field.deserialize(value))
+            if value is not None:
+                value = field.deserialize(value)
+            setattr(self, field_name, value)
         return self
 
     def serialize(self):
@@ -53,7 +57,9 @@ class Model(metaclass=MetaModel):
         fields = self.__class__._fields
         for field_name, field in fields.items():
             value = getattr(self, field.name, None)
-            dct[field_name] = field.serialize(value)
+            if value is not None:
+                value = field.serialize(value)
+            dct[field_name] = value
         return dct
 
     def sanitize(self):
