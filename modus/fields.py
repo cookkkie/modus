@@ -120,6 +120,12 @@ class Snowflake(BaseField):
 
         return value
 
+    def serialize(self, value):
+        if value is not None:
+            return str(value)
+        else:
+            return None
+
     @Field.validator
     def is_snowflake(self, value):
         try:
