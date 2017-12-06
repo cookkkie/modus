@@ -4,7 +4,7 @@ setup(
     name='modus',
     author='cookkkie',
     url='https://github.com/cookkkie/modus',
-    version='0.0.16',
+    version='0.0.17',
     packages=find_packages(),
     license='MIT',
     description='',
