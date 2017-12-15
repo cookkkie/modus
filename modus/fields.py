@@ -81,7 +81,7 @@ class Integer(BaseField):
         if self.max is None:
             return
 
-        if value > self.min:
+        if value > self.max:
             msg = self.ERRORS['max'].format(value, self.max)
             raise FieldValidationError(msg) from None
 
