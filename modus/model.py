@@ -84,6 +84,9 @@ class Model(metaclass=MetaModel):
     def fields(self):
         return self.__class__._fields.values()
 
+    def keys(self):
+        return (field.name for field in self.fields())
+
     def items(self):
         return ((field.name, getattr(self, field.name, None)) for field in self.__class__._fields.values())
 
