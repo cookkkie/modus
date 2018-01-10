@@ -80,3 +80,12 @@ class Model(metaclass=MetaModel):
 
         if validation_errors:
             raise ModelValidationError(**validation_errors)
+
+    def fields(self):
+        return self.__class__._fields.values()
+
+    def items(self):
+        return ((field.name, getattr(self, field.name, None)) for field in self.__class__._fields.values())
+
+    def values(self):
+        return (getattr(self, field.name, None) for field in self.__class__._fields.values())
