@@ -35,7 +35,10 @@ class Model(metaclass=MetaModel):
         for field_name, field in cls._fields.items():
             value = data.get(field.name)
             if value is None and hasattr(field, 'default'):
-                value = field.default
+                if callable(field.default):
+                    value = field.default()
+                else:
+                    value = field.default
             if value is not None:
                 value = field.deserialize(value)
             setattr(instance, field_name, value)
