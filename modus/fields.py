@@ -370,7 +370,17 @@ class DateTime(BaseField):
             kwargs['default'] = datetime.datetime.utcnow()
         return super(DateTime, self).__init__(*args, **kwargs)
 
-    def parse(self, string_date):
+    def to_int(self, d, key, default_to_zero=False, default=None, required=True):
+        value = d.get(key) or default
+        if (value in ["", None]) and default_to_zero:
+            return 0
+        if value is None:
+            if required:
+                raise Exception
+        else:
+            return int(value)
+
+    def parse(self, datestring):
         """
         Source: https://bitbucket.org/micktwomey/pyiso8601
         """
@@ -386,12 +396,12 @@ class DateTime(BaseField):
 
         try:
             return datetime.datetime(
-                year=to_int(groups, "year"),
-                month=to_int(groups, "month", default=to_int(groups, "monthdash", required=False, default=1)),
-                day=to_int(groups, "day", default=to_int(groups, "daydash", required=False, default=1)),
-                hour=to_int(groups, "hour", default_to_zero=True),
-                minute=to_int(groups, "minute", default_to_zero=True),
-                second=to_int(groups, "second", default_to_zero=True),
+                year=self.to_int(groups, "year"),
+                month=self.to_int(groups, "month", default=self.to_int(groups, "monthdash", required=False, default=1)),
+                day=self.to_int(groups, "day", default=self.to_int(groups, "daydash", required=False, default=1)),
+                hour=self.to_int(groups, "hour", default_to_zero=True),
+                minute=self.to_int(groups, "minute", default_to_zero=True),
+                second=self.to_int(groups, "second", default_to_zero=True),
                 microsecond=groups["second_fraction"],
                 tzinfo=tz,
             )
