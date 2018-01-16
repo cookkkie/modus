@@ -208,6 +208,24 @@ class String(BaseField):
                 raise FieldValidationError(msg) from None
 
 
+class URL(String):
+
+    URL_RX = re.compile(
+        r'http[s]?://'
+        r'(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]'
+        r'|(?:%[0-9a-fA-F][0-9a-fA-F]))+', re.IGNORECASE,
+    )
+
+    MESSAGES = {
+        'invalid_url': '{0} is an invalid URL',
+    }
+
+    @Field.validator
+    def validate_url(self, value):
+        if not self.URL_RX.match(value):
+            raise FieldValidationError(self.MESSAGES['invalid_url'].format(value)) from None
+
+
 class List(BaseField):
     def __init__(self, field, **kwargs):
         self.field = field
