@@ -1,8 +1,10 @@
 import re
 import functools
+import datetime
 
 from modus.field import Field
 from modus.exceptions import FieldValidationError, StopValidation, SerializationError
+from decimal import Decimal
 
 
 class BaseField(Field):
@@ -313,4 +315,106 @@ class ModelField(BaseField):
     def validate(self, value):
         if value:
             return value.validate()
+
+ISO8601_REGEX = re.compile(
+    r"""
+    (?P<year>[0-9]{4})
+    (
+        (
+            (-(?P<monthdash>[0-9]{1,2}))
+            |
+            (?P<month>[0-9]{2})
+            (?!$)  # Don't allow YYYYMM
+        )
+        (
+            (
+                (-(?P<daydash>[0-9]{1,2}))
+                |
+                (?P<day>[0-9]{2})
+            )
+            (
+                (
+                    (?P<separator>[ T])
+                    (?P<hour>[0-9]{2})
+                    (:{0,1}(?P<minute>[0-9]{2})){0,1}
+                    (
+                        :{0,1}(?P<second>[0-9]{1,2})
+                        ([.,](?P<second_fraction>[0-9]+)){0,1}
+                    ){0,1}
+                    (?P<timezone>
+                        Z
+                        |
+                        (
+                            (?P<tz_sign>[-+])
+                            (?P<tz_hour>[0-9]{2})
+                            :{0,1}
+                            (?P<tz_minute>[0-9]{2}){0,1}
+                        )
+                    ){0,1}
+                ){0,1}
+            )
+        ){0,1}  # YYYY-MM
+    ){0,1}  # YYYY only
+    $
+    """, re.VERBOSE
+)
+class DateTime(BaseField):
+
+    MESSAGES = {
+        'unknown_type': 'Unknown type (supported types: str (ISO8601), int (timestamp))',
+        'unknown_format': 'Unknown format (supported format: ISO8601)',
+    }
+
+    def __init__(self, *args, **kwargs):
+        if kwargs.pop('now') == True:
+            kwargs['default'] = datetime.datetime.utcnow()
+        return super(DateTime, self).__init__(*args, **kwargs)
+
+    def parse(self, string_date):
+        """
+        Source: https://bitbucket.org/micktwomey/pyiso8601
+        """
+        m = ISO8601_REGEX.match(datestring)
+        if not m:
+            raise SerializationError(self.MESSAGES['unknown_format'])
+
+        groups = m.groupdict()
+
+        tz = datetime.timezone.utc
+
+        groups["second_fraction"] = int(Decimal("0.%s" % (groups["second_fraction"] or 0)) * Decimal("1000000.0"))
+
+        try:
+            return datetime.datetime(
+                year=to_int(groups, "year"),
+                month=to_int(groups, "month", default=to_int(groups, "monthdash", required=False, default=1)),
+                day=to_int(groups, "day", default=to_int(groups, "daydash", required=False, default=1)),
+                hour=to_int(groups, "hour", default_to_zero=True),
+                minute=to_int(groups, "minute", default_to_zero=True),
+                second=to_int(groups, "second", default_to_zero=True),
+                microsecond=groups["second_fraction"],
+                tzinfo=tz,
+            )
+        except Exception as e:
+            raise SerializationError(self.MESSAGES['unknown_format'])
+
+    def serialize(self, value):
+        if value:
+            return value.isoformat()
+        return None
+
+    def deserialize(self, value):
+        if value is None:
+            return None
+
+        if type(value) == datetime.datetime:
+            return value
+
+        if type(value) == str:
+            return self.parse(value)
+
+        if type(value) == int:
+            return datetime.datetime.fromtimestamp(value)
+
+        raise SerializationError(self.MESSAGES['unknown_format'])
 
