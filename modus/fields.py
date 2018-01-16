@@ -366,7 +366,7 @@ class DateTime(BaseField):
     }
 
     def __init__(self, *args, **kwargs):
-        if kwargs.pop('now') == True:
+        if 'now' in kwargs and kwargs.pop('now') == True:
             kwargs['default'] = datetime.datetime.utcnow()
         return super(DateTime, self).__init__(*args, **kwargs)
 
