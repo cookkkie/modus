@@ -62,7 +62,6 @@ class Model(metaclass=MetaModel):
             value = getattr(self, field.name, None)
             if value is not None:
                 value = field.serialize(value)
-                value = field.sanitize(value)
             dct[field_name] = value
         return dct
 
