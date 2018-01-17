@@ -10,7 +10,7 @@ from decimal import Decimal
 class BaseField(Field):
 
     ERRORS = {'required': 'This field is required',
-              'choices': 'Should be one of {0}'}
+              'choices': 'Should be one of "{0}"'}
 
     def __init__(self, required=False, default=None, validators=[], sanitizers=[], choices=None):
         self.required = required
@@ -315,6 +315,10 @@ class ModelField(BaseField):
     def validate(self, value):
         if value:
             return value.validate()
+
+    def sanitize(self, value):
+        if value:
+            return value.sanitize()
 
 ISO8601_REGEX = re.compile(
     r"""
