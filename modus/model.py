@@ -20,13 +20,13 @@ class MetaModel(type):
 
         attrs['_fields'] = fields
 
-        res = type.__new__(mcl, name, bases, attrs)
+        cls = type.__new__(mcl, name, bases, attrs)
+        cls.__name__ = attrs['__qualname__']
+
+        return cls
 
 
-class Model():
-
-    __metaclass__ = MetaModel
-
+class Model(metaclass=MetaModel):
     def __init__(self, **kwargs):
         self.__class__.deserialize(kwargs, self)
 
