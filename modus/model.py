@@ -6,7 +6,6 @@ from copy import deepcopy
 class MetaModel(type):
     def __new__(mcl, name, bases, attrs):
         fields = {}
-        new_attrs = {}
 
         for base in bases:
             if hasattr(base, '_fields'):
@@ -18,14 +17,16 @@ class MetaModel(type):
                 field = deepcopy(value)
                 field.name = field_name
                 fields[field.name] = field
-            else:
-                new_attrs[name] = value
 
         attrs['_fields'] = fields
-        return type.__new__(mcl, name, bases, attrs)
+
+        res = type.__new__(mcl, name, bases, attrs)
 
 
-class Model(metaclass=MetaModel):
+class Model():
+
+    __metaclass__ = MetaModel
+
     def __init__(self, **kwargs):
         self.__class__.deserialize(kwargs, self)
 
@@ -95,3 +96,10 @@ class Model(metaclass=MetaModel):
 
     def values(self):
         return (getattr(self, field.name, None) for field in self.__class__._fields.values())
+
+    def __str__(self):
+        return 'object at 0x%x' % id(self)
+
+    def __repr__(self):
+        return '<%s: %s>' % (self.__class__.__name__, self)
+
