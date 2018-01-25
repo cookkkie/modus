@@ -98,8 +98,8 @@ class Model(metaclass=MetaModel):
         return (getattr(self, field.name, None) for field in self.__class__._fields.values())
 
     def __str__(self):
-        return 'object at 0x%x' % id(self)
+        return self.__repr__()
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self)
+        return '<%s object at 0x%s>' % (self.__class__.__name__, id(self))
 
