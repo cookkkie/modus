@@ -6,10 +6,13 @@ from copy import deepcopy
 class MetaModel(type):
     def __new__(mcl, name, bases, attrs):
         fields = {}
+        validators = []
 
         for base in bases:
             if hasattr(base, '_fields'):
                 fields.update(deepcopy(base._fields))
+            if hasattr(base, '_validators'):
+                validators += deepcopy(base._validators)
 
         for name, value in attrs.items():
             if isinstance(value, Field):
@@ -18,7 +21,11 @@ class MetaModel(type):
                 field.name = field_name
                 fields[field.name] = field
 
+            if getattr(value, 'is_validator', False):
+                validators.append(value)
+
         attrs['_fields'] = fields
+        attrs['_validators'] = validators
 
         cls = type.__new__(mcl, name, bases, attrs)
         cls.__name__ = attrs['__qualname__']
@@ -29,6 +36,11 @@ class MetaModel(type):
 class Model(metaclass=MetaModel):
     def __init__(self, **kwargs):
         self.__class__.deserialize(kwargs, self)
+
+    @classmethod
+    def validator(cls, f):
+        f.is_validator = True
+        return f
 
     @classmethod
     def deserialize(cls, data, instance=None):
@@ -84,6 +96,9 @@ class Model(metaclass=MetaModel):
 
         if validation_errors:
             raise ModelValidationError(**validation_errors)
+
+        for validator in self._validators:
+            validator(self)
 
     def fields(self):
         return self.__class__._fields.values()
