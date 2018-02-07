@@ -149,11 +149,12 @@ class String(BaseField):
               'max_length': '{0} length should be lower than {1}',
               'no_match': '{0} doesn\'t match {1}'}
 
-    def __init__(self, min_length=-1, max_length=-1, length=-1, regex=None, **kwargs):
+    def __init__(self, convert=False, min_length=-1, max_length=-1, length=-1, regex=None, **kwargs):
         self.regex = regex
         self.min_length = min_length
         self.max_length = max_length
         self.length = length
+        self.convert = convert
         super(String, self).__init__(**kwargs)
 
     @property
@@ -168,11 +169,11 @@ class String(BaseField):
             return self._rx
 
     def deserialize(self, value):
-        if not isinstance(value, str):
+        if not self.convert and not isinstance(value, str):
             msg = self.ERRORS['not_string'].format(value)
             raise SerializationError(msg) from None
 
-        return value
+        return str(value)
 
     @Field.validator
     def is_string(self, value):
