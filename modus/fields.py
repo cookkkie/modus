@@ -238,8 +238,15 @@ class URL(String):
 
 
 class List(BaseField):
-    def __init__(self, field, **kwargs):
+    ERRORS = {
+        'max_length': '{0} length should be lower than {1}',
+        'min_length': '{0} length should be higher than {1}',
+    }
+
+    def __init__(self, field, max_length=-1, min_length=-1, **kwargs):
         self.field = field
+        self.max_length = max_length
+        self.min_length = min_length
         super(List, self).__init__(**kwargs)
 
     def deserialize(self, values):
@@ -253,6 +260,26 @@ class List(BaseField):
             return []
 
         return [self.field.serialize(value) for value in values]
+
+    @Field.validator
+    def validate_min_length(self, value):
+        if value is None:
+            return
+
+        if self.min_length != -1:
+            if len(value) < self.min_length:
+                msg = self.ERRORS['min_length'].format(value, self.min_length)
+                raise FieldValidationError(msg)
+
+    @Field.validator
+    def validate_max_length(self, value):
+        if value is None:
+            return
+
+        if self.max_length != -1:
+            if len(value) > self.max_length:
+                msg = self.ERRORS['max_length'].format(value, self.max_length)
+                raise FieldValidationError(msg)
 
     @Field.validator
     def validate_elements(self, elems):
