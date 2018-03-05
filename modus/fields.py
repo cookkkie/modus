@@ -41,6 +41,14 @@ class BaseField(Field):
                 raise FieldValidationError(msg, stop_validation=True) from None
 
 
+class Any(BaseField):
+    def serialize(self, value):
+        return value
+
+    def deserialize(self, value):
+        return value
+
+
 class Integer(BaseField):
 
     ERRORS = {'not_integer': 'This is not an integer',
