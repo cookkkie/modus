@@ -1,4 +1,3 @@
-from modus.utils import get
 from modus.exceptions import FieldValidationError, StopValidation
 from copy import deepcopy
 
@@ -20,9 +19,9 @@ class MetaField(type):
                     attrs['ERRORS'] = base.ERRORS
 
         for value in attrs.values():
-            if get(value, 'is_validator'):
+            if getattr(value, 'is_validator', False) == True:
                 validators.append(value)
-            if get(value, 'is_sanitizer'):
+            if getattr(value, 'is_sanitizer', False) == True:
                 sanitizers.append(value)
 
         attrs['_validators'] = validators
@@ -69,4 +68,3 @@ class Field(metaclass=MetaField):
             raise FieldValidationError(*errors)
 
         return True
-

@@ -21,7 +21,7 @@ class MetaModel(type):
                 field.name = field_name
                 fields[field.name] = field
 
-            if getattr(value, 'is_validator', False):
+            if getattr(value, 'is_validator', False) == True:
                 validators.append(value)
 
         attrs['_fields'] = fields
@@ -117,4 +117,3 @@ class Model(metaclass=MetaModel):
 
     def __repr__(self):
         return '<%s object at 0x%s>' % (self.__class__.__name__, id(self))
-
