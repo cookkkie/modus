@@ -407,7 +407,7 @@ class DateTime(BaseField):
 
     def __init__(self, *args, **kwargs):
         if 'now' in kwargs and kwargs.pop('now') == True:
-            kwargs['default'] = datetime.datetime.utcnow()
+            kwargs['default'] = datetime.datetime.utcnow
         return super(DateTime, self).__init__(*args, **kwargs)
 
     def to_int(self, d, key, default_to_zero=False, default=None, required=True):
